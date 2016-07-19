@@ -1,6 +1,7 @@
-package com.example.auth;
+package com.example.server;
 
 import java.security.Principal;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -21,16 +22,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @RestController
 @EnableResourceServer
 @EnableAuthorizationServer
-@PropertySource("classpath:auth-server.properties")
-public class Oauth2AuthorizationServerApplication extends WebMvcConfigurerAdapter {
+@PropertySource("classpath:auth-and-resource-server.properties")
+public class AuthAndResourceServer extends WebMvcConfigurerAdapter {
 
     public static void main(String... args) {
-        SpringApplication.run(Oauth2AuthorizationServerApplication.class, args);
+        SpringApplication.run(AuthAndResourceServer.class, args);
     }
 
-    @RequestMapping("/user")
+    @RequestMapping("/auth/user")
     public Principal user(Principal user) {
         return user;
+    }
+
+    @RequestMapping("/resource")
+    public String securedCall() {
+        return "success (id: " + UUID.randomUUID().toString().toUpperCase() + ")";
     }
 
     @Configuration
@@ -47,9 +53,10 @@ public class Oauth2AuthorizationServerApplication extends WebMvcConfigurerAdapte
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
             clients.inMemory().withClient("foo").secret("foosecret")
-                    .authorizedGrantTypes("authorization_code", "refresh_token", "password").scopes("openid")
-                    .authorities("ROLE_USER", "ROLE_TEST");
+                    .authorizedGrantTypes("authorization_code", "refresh_token", "password").scopes("openid");
         }
     }
+
+
 
 }
